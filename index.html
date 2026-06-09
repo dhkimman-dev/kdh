@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Point Share</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { background: #0f0f0f; font-family: 'Segoe UI', sans-serif; min-height: 100vh; color: #fff; }
+input, button { font-family: inherit; }
+input:focus { outline: none; }
+#app { display: flex; justify-content: center; padding: 20px 12px 60px; min-height: 100vh; align-items: flex-start; }
+.card { background: #1a1a1a; border-radius: 24px; padding: 32px 24px; width: 100%; max-width: 420px; border: 1px solid #2a2a2a; }
+.hex-logo { font-size: 48px; text-align: center; margin-bottom: 8px; }
+.big-title { text-align: center; font-size: 36px; font-weight: 900; letter-spacing: 6px; color: #fff; line-height: 1.1; margin-bottom: 6px; }
+.tagline { text-align: center; color: #555; font-size: 13px; margin-bottom: 28px; }
+.section-label { font-weight: 700; font-size: 10px; color: #444; letter-spacing: 3px; margin: 18px 0 10px; text-transform: uppercase; }
+.inp { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1.5px solid #2a2a2a; background: #111; color: #fff; font-size: 16px; margin-bottom: 10px; transition: border 0.2s; }
+.inp:focus { border-color: #555; }
+.inp::placeholder { color: #444; }
+.row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.row-label { font-weight: 600; color: #888; font-size: 14px; }
+.stepper { display: flex; align-items: center; gap: 10px; }
+.step-btn { width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid #333; background: #222; color: #fff; font-size: 18px; cursor: pointer; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.step-val { font-weight: 700; font-size: 14px; min-width: 90px; text-align: center; color: #fff; }
+.btn { width: 100%; padding: 14px 0; border-radius: 12px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; margin-bottom: 8px; transition: opacity 0.2s, transform 0.1s; }
+.btn:active { transform: scale(0.98); }
+.btn-dark { background: #fff; color: #111; }
+.btn-teal { background: #4ECDC4; color: #fff; }
+.btn-disabled { background: #2a2a2a !important; color: #555 !important; cursor: not-allowed; }
+.err-msg { background: #2a0000; color: #ff6b6b; border-radius: 8px; padding: 10px 14px; font-size: 13px; text-align: center; margin-top: 8px; border: 1px solid #3a0000; }
+.wait-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.wait-title { font-weight: 900; font-size: 22px; color: #fff; }
+.code-box { background: #111; border-radius: 10px; padding: 7px 16px; text-align: center; border: 1px solid #333; }
+.code-label { display: block; color: #444; font-size: 9px; letter-spacing: 2px; margin-bottom: 2px; }
+.code-val { color: #FFD93D; font-weight: 900; font-size: 22px; letter-spacing: 5px; }
+.wait-sub { color: #555; font-size: 12px; margin-bottom: 18px; line-height: 1.6; }
+.wait-sub strong { color: #FFD93D; }
+.player-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.wait-player { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #111; border-radius: 10px; border: 1px solid #222; }
+.w-avatar { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 16px; flex-shrink: 0; }
+.w-name { flex: 1; font-weight: 600; color: #ddd; font-size: 15px; }
+.host-badge { background: #FFD93D; color: #111; border-radius: 6px; padding: 2px 8px; font-size: 10px; font-weight: 700; }
+.me-badge { background: #4ECDC4; color: #fff; border-radius: 6px; padding: 2px 8px; font-size: 10px; font-weight: 700; }
+.wait-count { text-align: center; color: #444; font-size: 12px; margin-bottom: 6px; }
+.wait-msg { text-align: center; color: #555; font-size: 14px; padding: 14px 0; }
+.game-wrap { width: 100%; max-width: 500px; }
+.game-header { display: flex; justify-content: space-between; align-items: center; background: #1a1a1a; border-radius: 16px; padding: 13px 18px; margin-bottom: 12px; border: 1px solid #2a2a2a; }
+.gh-title { font-weight: 900; letter-spacing: 3px; font-size: 14px; color: #fff; }
+.gh-code { color: #444; font-size: 11px; margin-top: 2px; }
+.gh-pool { color: #555; font-size: 11px; text-align: right; }
+.gh-me { border-radius: 8px; padding: 3px 10px; font-size: 12px; font-weight: 700; margin-top: 4px; color: #fff; display: inline-block; }
+.grid { display: grid; gap: 10px; margin-bottom: 12px; }
+.p-card { border-radius: 14px; padding: 14px 12px; position: relative; text-align: center; cursor: pointer; transition: all 0.15s; background: #1a1a1a; border: 2px solid #2a2a2a; user-select: none; -webkit-user-select: none; }
+.p-card:active { transform: scale(0.96); }
+.p-avatar { width: 40px; height: 40px; border-radius: 11px; margin: 0 auto 7px; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 17px; }
+.p-name { font-size: 12px; color: #666; font-weight: 600; margin-bottom: 3px; }
+.p-me-tag { color: #4ECDC4; }
+.p-pts { font-size: 20px; font-weight: 800; color: #fff; }
+.p-p { font-size: 11px; color: #444; margin-left: 2px; }
+.bar-bg { background: #222; border-radius: 99px; height: 3px; margin: 7px 0 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s; }
+.p-pct { font-size: 10px; color: #444; }
+.from-badge { position: absolute; top: 6px; right: 6px; background: #FF6B6B; color: #fff; border-radius: 6px; font-size: 10px; padding: 2px 7px; font-weight: 700; }
+.to-badge { position: absolute; top: 6px; right: 6px; background: #2ECC71; color: #fff; border-radius: 6px; font-size: 10px; padding: 2px 7px; font-weight: 700; }
+.panel { background: #1a1a1a; border-radius: 16px; padding: 16px 18px; margin-bottom: 12px; border: 1px solid #2a2a2a; }
+.tx-info { background: #111; border-radius: 10px; padding: 11px 14px; font-size: 13px; font-weight: 600; display: flex; align-items: center; margin-bottom: 10px; border: 1px solid #222; min-height: 44px; }
+.tx-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.amt-input { flex: 1; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #2a2a2a; background: #111; color: #fff; font-size: 17px; font-weight: 600; }
+.amt-input::placeholder { color: #444; }
+.send-btn { padding: 11px 18px; border-radius: 10px; background: #fff; color: #111; border: none; font-weight: 800; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.quick-row { display: flex; gap: 6px; }
+.quick-btn { flex: 1; padding: 7px 0; border-radius: 8px; border: 1.5px solid #2a2a2a; background: #111; color: #888; font-size: 11px; font-weight: 600; cursor: pointer; }
+.log-box { background: #1a1a1a; border-radius: 16px; padding: 16px 18px; border: 1px solid #2a2a2a; }
+.log-title { font-weight: 700; font-size: 10px; color: #444; letter-spacing: 3px; margin-bottom: 10px; }
+.log-row { display: flex; align-items: center; gap: 5px; padding: 7px 0; border-bottom: 1px solid #222; font-size: 12px; }
+.log-row:last-child { border-bottom: none; }
+.log-time { color: #444; font-size: 10px; min-width: 58px; }
+.log-from { font-weight: 600; color: #FF6B6B; }
+.log-to { font-weight: 600; color: #2ECC71; flex: 1; }
+.log-amt { font-weight: 700; color: #ddd; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #333; border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const SUPABASE_URL = "https://vwapaczbvhlpzsvzydxd.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ3YXBhY3pidmhscHpzdnp5ZHhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NDAxNTIsImV4cCI6MjA5NjIxNjE1Mn0.NMhesSAI2gtVTflLjOeTfTX2vd1aOIDnwpkldRkcBLU";
+const PALETTE = ["#FF6B6B","#4ECDC4","#FFD93D","#6C5CE7","#FF8C42","#2ECC71","#E91E8C","#00B4D8"];
+const fmt = n => Number(n).toLocaleString("ko-KR");
+const genCode = () => Math.random().toString(36).substring(2,8).toUpperCase();
+const esc = s => String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+
+let S = {
+  screen:"lobby", myId:null, roomCode:"", nickname:"", inputCode:"",
+  isHost:false, initPoints:100000, room:null,
+  fromId:null, toId:null, amount:"", err:"", loading:false, pollTimer:null
+};
+
+// ── Supabase API ─────────────────────────────────────────
+const headers = { "apikey": SUPABASE_KEY, "Authorization": `Bearer ${SUPABASE_KEY}`, "Content-Type": "application/json", "Prefer": "return=representation" };
+
+async function getRoom(code) {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/rooms?code=eq.${code}&select=*`, { headers });
+    const j = await r.json();
+    return j[0]?.data || null;
+  } catch { return null; }
+}
+
+async function upsertRoom(code, data) {
+  await fetch(`${SUPABASE_URL}/rest/v1/rooms`, {
+    method: "POST",
+    headers: { ...headers, "Prefer": "resolution=merge-duplicates,return=representation" },
+    body: JSON.stringify({ code, data, updated_at: new Date().toISOString() })
+  });
+}
+
+// ── 폴링 ─────────────────────────────────────────────────
+function startPoll(code) {
+  if (S.pollTimer) clearInterval(S.pollTimer);
+  S.pollTimer = setInterval(async () => {
+    const data = await getRoom(code);
+    if (!data) return;
+    const wasWaiting = S.screen === "waiting";
+    S.room = data;
+    if (wasWaiting && data.status === "playing") S.screen = "game";
+    render();
+  }, 2000);
+}
+
+// ── 액션 ─────────────────────────────────────────────────
+async function createRoom() {
+  if (!S.nickname.trim()) return setErr("닉네임을 입력하세요");
+  setLoading(true);
+  const id = Date.now().toString();
+  const code = genCode();
+  const data = { code, host:id, status:"waiting", initPoints:S.initPoints,
+    players:[{id, name:S.nickname.trim(), color:PALETTE[0], points:S.initPoints}], log:[] };
+  await upsertRoom(code, data);
+  S.myId=id; S.roomCode=code; S.room=data; S.isHost=true; S.screen="waiting";
+  setLoading(false);
+  startPoll(code);
+  render();
+}
+
+async function joinRoom() {
+  if (!S.nickname.trim()) return setErr("닉네임을 입력하세요");
+  const code = (S.inputCode||"").trim().toUpperCase();
+  if (!code) return setErr("방 코드를 입력하세요");
+  setLoading(true);
+  const data = await getRoom(code);
+  if (!data) { setLoading(false); return setErr("방을 찾을 수 없습니다"); }
+  if (data.status==="playing") { setLoading(false); return setErr("이미 시작된 방입니다"); }
+  if (data.players.length>=8) { setLoading(false); return setErr("방이 꽉 찼습니다"); }
+  const id = Date.now().toString();
+  const updated = { ...data, players:[...data.players, {id, name:S.nickname.trim(), color:PALETTE[data.players.length%PALETTE.length], points:data.initPoints}] };
+  await upsertRoom(code, updated);
+  S.myId=id; S.roomCode=code; S.room=updated; S.isHost=false; S.screen="waiting";
+  setLoading(false);
+  startPoll(code);
+  render();
+}
+
+async function startGame() {
+  if (!S.room||S.room.players.length<2) return setErr("최소 2명이 필요합니다");
+  setLoading(true);
+  const updated = {...S.room, status:"playing"};
+  await upsertRoom(S.roomCode, updated);
+  S.room=updated; S.screen="game";
+  setLoading(false); render();
+}
+
+async function transfer() {
+  const amt = parseInt(S.amount, 10);
+  if (!S.fromId) return setErr("보내는 사람을 선택하세요");
+  if (!S.toId) return setErr("받는 사람을 선택하세요");
+  if (S.fromId===S.toId) return setErr("같은 사람에게 보낼 수 없습니다");
+  if (!amt||amt<=0) return setErr("유효한 포인트를 입력하세요");
+  setLoading(true);
+  const latest = await getRoom(S.roomCode);
+  if (!latest) { setLoading(false); return setErr("데이터 오류, 다시 시도해주세요"); }
+  const sender = latest.players.find(p=>p.id===S.fromId);
+  if (!sender||sender.points<amt) { setLoading(false); return setErr("포인트가 부족합니다"); }
+  const updated = {
+    ...latest,
+    players: latest.players.map(p => {
+      if (p.id===S.fromId) return {...p, points:p.points-amt};
+      if (p.id===S.toId) return {...p, points:p.points+amt};
+      return p;
+    }),
+    log: [{from:sender.name, to:latest.players.find(p=>p.id===S.toId)?.name, amt,
+      time:new Date().toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})},
+      ...(latest.log||[]).slice(0,29)]
+  };
+  await upsertRoom(S.roomCode, updated);
+  S.room=updated; S.fromId=null; S.toId=null; S.amount=""; S.err="";
+  setLoading(false); render();
+}
+
+function setErr(msg) { S.err=msg; render(); }
+function setLoading(v) { S.loading=v; render(); }
+
+// ── 렌더 ─────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById("app");
+  if (S.screen==="lobby") app.innerHTML = renderLobby();
+  else if (S.screen==="waiting") app.innerHTML = renderWaiting();
+  else app.innerHTML = renderGame();
+  bindEvents();
+}
+
+function renderLobby() {
+  return `<div class="card">
+    <div class="hex-logo">⬡</div>
+    <h1 class="big-title">POINT<br>SHARE</h1>
+    <p class="tagline">링크만 공유하면 누구나 참가</p>
+    <input class="inp" id="nickname" placeholder="닉네임 입력" value="${esc(S.nickname)}" maxlength="10"/>
+    <div class="section-label">방 만들기</div>
+    <div class="row">
+      <span class="row-label">초기 포인트</span>
+      <div class="stepper">
+        <button class="step-btn" id="dec">−</button>
+        <span class="step-val">${fmt(S.initPoints)}</span>
+        <button class="step-btn" id="inc">+</button>
+      </div>
+    </div>
+    <button class="btn btn-dark" id="createBtn" ${S.loading?"disabled":""}>
+      ${S.loading?'<span class="spinner"></span>방 생성 중...':'방 만들기 →'}
+    </button>
+    <div class="section-label">방 참가</div>
+    <input class="inp" id="inputCode" placeholder="방 코드 6자리" value="${esc(S.inputCode||"")}" maxlength="6"
+      style="text-transform:uppercase;letter-spacing:4px;text-align:center;font-weight:700"/>
+    <button class="btn btn-teal" id="joinBtn" ${S.loading?"disabled":""}>
+      ${S.loading?'<span class="spinner"></span>찾는 중...':'참가하기 →'}
+    </button>
+    ${S.err?`<div class="err-msg">${esc(S.err)}</div>`:""}
+  </div>`;
+}
+
+function renderWaiting() {
+  const players = S.room?.players||[];
+  return `<div class="card">
+    <div class="wait-top">
+      <span class="wait-title">대기실</span>
+      <div class="code-box"><span class="code-label">방 코드</span><span class="code-val">${S.roomCode}</span></div>
+    </div>
+    <p class="wait-sub">이 앱 링크 + 코드 <strong>${S.roomCode}</strong> 를 친구들에게 공유하세요</p>
+    <div class="player-list">
+      ${players.map(p=>`<div class="wait-player" style="border-left:4px solid ${p.color}">
+        <div class="w-avatar" style="background:${p.color}">${esc(p.name[0])}</div>
+        <span class="w-name">${esc(p.name)}</span>
+        ${p.id===S.room?.host?'<span class="host-badge">방장</span>':""}
+        ${p.id===S.myId?'<span class="me-badge">나</span>':""}
+      </div>`).join("")}
+    </div>
+    <div class="wait-count">${players.length}명 접속 중 · 2초마다 갱신</div>
+    ${S.isHost?`<button class="btn ${players.length>=2&&!S.loading?"btn-dark":"btn-disabled"}" id="startBtn" ${players.length<2||S.loading?"disabled":""}>
+      ${S.loading?'<span class="spinner"></span>시작 중...':`게임 시작 (${players.length}명) →`}
+    </button>`:`<div class="wait-msg">⏳ 방장이 시작하길 기다리는 중...</div>`}
+    ${S.err?`<div class="err-msg">${esc(S.err)}</div>`:""}
+  </div>`;
+}
+
+function renderGame() {
+  const players = S.room?.players||[];
+  const total = players.reduce((s,p)=>s+p.points,0);
+  const me = players.find(p=>p.id===S.myId);
+  const cols = Math.min(2,players.length);
+  const fp = players.find(p=>p.id===S.fromId);
+  const tp = players.find(p=>p.id===S.toId);
+  return `<div class="game-wrap">
+    <div class="game-header">
+      <div><div class="gh-title">⬡ POINT SHARE</div><div class="gh-code">방 코드: ${S.roomCode}</div></div>
+      <div><div class="gh-pool">POOL ${fmt(total)}P</div>
+        ${me?`<div class="gh-me" style="background:${me.color}">${esc(me.name)} ${fmt(me.points)}P</div>`:""}
+      </div>
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(${cols},1fr)">
+      ${players.map(p=>{
+        const isFrom=S.fromId===p.id, isTo=S.toId===p.id;
+        const pct=total>0?p.points/total*100:0;
+        let bg="#1a1a1a", border="2px solid #2a2a2a";
+        if(isFrom){bg="#2a1515";border=`2.5px solid ${p.color}`;}
+        if(isTo){bg="#152a15";border="2.5px solid #2ECC71";}
+        return `<div class="p-card" data-pid="${p.id}" style="background:${bg};border:${border}">
+          <div class="p-avatar" style="background:${p.color}">${esc(p.name[0])}</div>
+          <div class="p-name">${esc(p.name)}${p.id===S.myId?'<span class="p-me-tag"> (나)</span>':""}</div>
+          <div class="p-pts">${fmt(p.points)}<span class="p-p">P</span></div>
+          <div class="bar-bg"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${p.color}"></div></div>
+          <div class="p-pct">${pct.toFixed(1)}%</div>
+          ${isFrom?'<div class="from-badge">📤 보내기</div>':""}
+          ${isTo?'<div class="to-badge">📥 받기</div>':""}
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="panel">
+      <div class="tx-info">
+        <span style="color:${fp?fp.color:"#444"}">${fp?`📤 ${esc(fp.name)}`:"① 보내는 사람 선택"}</span>
+        <span style="color:#333;margin:0 8px">→</span>
+        <span style="color:${tp?"#2ECC71":"#444"}">${tp?`📥 ${esc(tp.name)}`:"② 받는 사람 선택"}</span>
+      </div>
+      <div class="tx-row">
+        <input class="amt-input" id="amtInput" type="number" placeholder="포인트" value="${S.amount}"/>
+        <button class="send-btn" id="sendBtn" ${S.loading?"disabled":""}>${S.loading?"...":"전송 →"}</button>
+      </div>
+      <div class="quick-row">
+        ${[1000,5000,10000,50000].map(v=>`<button class="quick-btn" data-amt="${v}">${fmt(v)}</button>`).join("")}
+      </div>
+      ${S.err?`<div class="err-msg" style="margin-top:8px">${esc(S.err)}</div>`:""}
+    </div>
+    ${(S.room?.log||[]).length>0?`<div class="log-box">
+      <div class="log-title">거래 내역</div>
+      ${S.room.log.map(l=>`<div class="log-row">
+        <span class="log-time">${l.time}</span>
+        <span class="log-from">${esc(l.from)}</span>
+        <span style="color:#333;margin:0 4px">→</span>
+        <span class="log-to">${esc(l.to)}</span>
+        <span class="log-amt">+${fmt(l.amt)}P</span>
+      </div>`).join("")}
+    </div>`:""}
+  </div>`;
+}
+
+function bindEvents() {
+  const sc = S.screen;
+  if (sc==="lobby") {
+    document.getElementById("nickname")?.addEventListener("input",e=>{S.nickname=e.target.value;S.err="";});
+    document.getElementById("inputCode")?.addEventListener("input",e=>{S.inputCode=e.target.value.toUpperCase();S.err="";});
+    document.getElementById("dec")?.addEventListener("click",()=>{S.initPoints=Math.max(10000,S.initPoints-10000);render();});
+    document.getElementById("inc")?.addEventListener("click",()=>{S.initPoints=Math.min(1000000,S.initPoints+10000);render();});
+    document.getElementById("createBtn")?.addEventListener("click",createRoom);
+    document.getElementById("joinBtn")?.addEventListener("click",joinRoom);
+  }
+  if (sc==="waiting") {
+    document.getElementById("startBtn")?.addEventListener("click",startGame);
+  }
+  if (sc==="game") {
+    document.querySelectorAll(".p-card").forEach(el=>{
+      el.addEventListener("click",()=>{
+        const pid=el.dataset.pid; S.err="";
+        if(!S.fromId){S.fromId=pid;}
+        else if(S.fromId===pid){S.fromId=null;}
+        else{S.toId=S.toId===pid?null:pid;}
+        render();
+      });
+    });
+    document.getElementById("amtInput")?.addEventListener("input",e=>{S.amount=e.target.value;});
+    document.getElementById("amtInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")transfer();});
+    document.getElementById("sendBtn")?.addEventListener("click",transfer);
+    document.querySelectorAll(".quick-btn").forEach(btn=>{
+      btn.addEventListener("click",()=>{S.amount=btn.dataset.amt;render();});
+    });
+  }
+}
+
+render();
+</script>
+</body>
+</html>
